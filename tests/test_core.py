@@ -19,3 +19,32 @@ def test_invalid_evidence_level(monkeypatch,tmp_path):
     monkeypatch.setenv("HIVE_HOME",str(tmp_path/"hive-home")); initialize()
     rid=add_repository("https://github.com/example/another")
     with pytest.raises(ValueError): add_capability(rid,"something",evidence_level="proven")
+
+
+def test_initialize_creates_complete_schema_at_explicit_path(tmp_path):
+    from hive.db import connect
+
+    database = tmp_path / "custom" / "hive.db"
+
+    returned_path = initialize(database)
+
+    assert returned_path == database
+
+    with connect(database) as conn:
+        tables = {
+            row["name"]
+            for row in conn.execute("""
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+            """).fetchall()
+        }
+
+    assert {
+        "repositories",
+        "capabilities",
+        "analysis_runs",
+        "source_files",
+        "source_symbols",
+        "source_relationships",
+    } <= tables

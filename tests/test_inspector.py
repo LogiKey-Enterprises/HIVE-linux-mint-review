@@ -6,6 +6,7 @@ import pytest
 from hive.db import connect, initialize
 from hive.repositories import add_repository
 from hive.inspector import inspect_repository
+from hive.graph import build_graph, show_graph
 
 
 def test_inspector_finds_python_symbols(monkeypatch, tmp_path):
@@ -126,6 +127,35 @@ def test_inspector_removes_stale_file_records(monkeypatch, tmp_path):
     assert symbols == 0
 
 
+def test_inspector_invalidates_stale_graph_relationships(
+    monkeypatch, tmp_path
+):
+    monkeypatch.setenv("HIVE_HOME", str(tmp_path / "hive-home"))
+    initialize()
+
+    repository_id = add_repository(
+        "https://github.com/example/graph-invalidation-test"
+    )
+
+    project = tmp_path / "project"
+    project.mkdir()
+
+    (project / "main.py").write_text("import helper\n")
+    (project / "helper.py").write_text("VALUE = 1\n")
+
+    inspect_repository(repository_id, project)
+    build_graph(repository_id, project)
+
+    assert len(show_graph(repository_id)) == 1
+
+    (project / "main.py").write_text("VALUE = 2\n")
+    (project / "helper.py").unlink()
+
+    inspect_repository(repository_id, project)
+
+    assert show_graph(repository_id) == []
+
+
 def test_inspector_preserves_previous_snapshot_on_database_failure(
     monkeypatch, tmp_path
 ):
@@ -140,9 +170,14 @@ def test_inspector_preserves_previous_snapshot_on_database_failure(
     project.mkdir()
 
     source = project / "main.py"
-    source.write_text("def original(): pass\n")
+    source.write_text("import helper\ndef original(): pass\n")
+    (project / "helper.py").write_text("VALUE = 1\n")
 
     inspect_repository(repository_id, project)
+    build_graph(repository_id, project)
+
+    original_graph = show_graph(repository_id)
+    assert len(original_graph) == 1
 
     with connect() as conn:
         original_file = conn.execute(
@@ -201,3 +236,6 @@ def test_inspector_preserves_previous_snapshot_on_database_failure(
     assert [tuple(row) for row in current_symbols] == [
         tuple(row) for row in original_symbols
     ]
+
+    # Graph deletion must roll back with the failed inspection.
+    assert show_graph(repository_id) == original_graph
