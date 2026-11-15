@@ -49,12 +49,51 @@
     "enabled": true,
     "active": true,
     "linger": "yes, asserted by successful script",
-    "reboot_verified": "UNKNOWN",
-    "crash_recovery_tested": "UNKNOWN"
+    "reboot_verified": true,
+    "crash_recovery_tested": "UNKNOWN",
+    "reboot_observation": {
+      "boot_local": "2026-11-15 14:05:10 CST",
+      "service_started_local": "2026-11-15 14:05:17 CST",
+      "startup_seconds": 7,
+      "pid": 1200,
+      "service_state": "active",
+      "linger": "yes",
+      "server_manually_started_by_check": false,
+      "instruction_pass": false,
+      "response_description": "Unrelated Apache Hive explanation instead of requested phrase",
+      "basis": "operator reported reboot and pasted diagnostic output"
+    }
   },
   "packaged_scripts": {
     "status": "new reusable packaging of successful commands",
     "validation": "shell and embedded Python syntax checked; exact packaged scripts not executed end-to-end on laptop"
   },
-  "recurring_reliability": "UNKNOWN"
+  "recurring_reliability": "UNKNOWN",
+  "monitoring": {
+    "installed": true,
+    "timer": "hive-reliability.timer",
+    "timer_active": true,
+    "interval_minutes": 5,
+    "observed_samples": 1,
+    "first_sample": {
+      "timestamp_utc": "2026-11-15T20:20:59.307768+00:00",
+      "boot_id": "46c57fc0-a187-4cd0-8d03-fc773016ea8e",
+      "availability_pass": true,
+      "instruction_pass": true,
+      "response_seconds": 1.117,
+      "response_excerpt": "HIVE_OK",
+      "failure_streak": 0,
+      "recovery": "none"
+    },
+    "first_sample_trigger": "explicit installer service start",
+    "later_timer_firings": "UNKNOWN",
+    "monitor_reboot_persistence": "UNKNOWN",
+    "recovery_policy": {
+      "consecutive_availability_failures": 2,
+      "cooldown_seconds": 1800,
+      "max_attempts_per_utc_day": 3,
+      "restart_for_instruction_failure": false
+    },
+    "actual_recovery_tested": "UNKNOWN"
+  }
 }

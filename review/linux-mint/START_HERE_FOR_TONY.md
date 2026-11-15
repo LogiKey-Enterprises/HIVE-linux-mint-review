@@ -22,8 +22,9 @@ Evidence comes from operator-pasted terminal output, not direct remote inspectio
 | Live HIVE provider request | "HIVE local AI connected"; 1.25 seconds |
 | systemd handover | Enabled, active, response "HIVE startup verified" |
 | Before-login startup configuration | Linger=yes asserted by successful setup script |
-| Actual reboot persistence | UNKNOWN |
-| Repeated reliability / crash recovery | UNKNOWN |
+| Actual reboot persistence | One operator-reported reboot checked; enabled/active service and live response |
+| Recurring monitoring | Installed, timer active; first availability + instruction sample passed in 1.117 s |
+| Sustained reliability / actual recovery | UNKNOWN |
 
 Mint 22.3 Xfce is supported by the existing broxson-mobile continuity record; /etc/os-release was not freshly captured in this session. The runtime archive digest matched the GitHub release asset. The model GGUF header was checked, but its publisher digest was not independently verified.
 
@@ -73,4 +74,30 @@ The installers do not migrate ~/.hive/hive.db.
 Suspend pauses inference; login-encrypted home directories may prevent before-login loading.
 Zero capability records is expected: inspection does not promote capability claims.
 
-Acceptance remains bounded: complete one post-reboot verification, then decide whether to adopt the small documentation/startup additions upstream. Reboot and crash tests remain UNKNOWN.
+Acceptance remains bounded: one post-reboot check passed. Observe later scheduled samples and test monitoring persistence before any sustained-reliability claim; actual crash recovery remains UNKNOWN.
+
+## November 15 update — reboot verified; monitoring started
+
+Machine: broxson-mobile, documented Linux Mint 22.3 Xfce. Evidence: operator-pasted terminal output.
+
+- Reported reboot: 2026-11-15 14:05:10 CST. AI service started at 14:05:17 CST (7 seconds later), PID 1200; enabled, active, Linger=yes.
+- The check did not start the server manually. HIVE received a live response after reboot: one reboot persistence check PASSED.
+- Instruction-following FAILED that reboot prompt: the model described unrelated Apache Hive rather than returning the requested phrase. Availability success must not be reported as instruction-following success.
+- Reliability timer installation then completed. Timer hive-reliability.timer was active, next check about five minutes later.
+- First observation: 2026-11-15T20:20:59.307768+00:00 (14:20:59 CST), boot ID 46c57fc0-a187-4cd0-8d03-fc773016ea8e.
+- Sample 1: availability=true; exact instruction=true; response HIVE_OK; 1.117 seconds; failure_streak=0; recovery=none.
+
+### Implemented monitor policy
+
+Every five minutes while awake: check service state, HTTP /health and one short HIVE provider inference request. Record availability and exact instruction-following separately, with response time and boot ID. Rotating JSONL history (2 MB per file, three backups), latest JSON and cumulative state are local only.
+
+Two consecutive availability failures permit a restart only if the AI service is enabled, the 30-minute recovery cooldown has elapsed and fewer than three attempts have occurred that UTC day. An incorrect nonempty response does not trigger restart. A successful restart command is only a recovery request; the next sample must verify availability. A failed availability request's instruction result is unknown, not an instruction pass.
+
+Paths on operator machine: ~/.local/share/hive-reliability/{check.py,checks.jsonl,latest.json,state.json}; user units hive-reliability.service and hive-reliability.timer.
+Pause monitoring: systemctl --user disable --now hive-reliability.timer, then systemctl --user stop hive-reliability.service.
+
+### Evidence limits and next acceptance
+
+One reboot is verified; only ONE monitor sample is available in this conversation. Later scheduled firings, monitoring persistence across another reboot, sustained reliability and actual recovery after failure remain UNKNOWN. The first monitor run was explicitly triggered by its installer; an active timer does not prove later firings. No failure was induced and no recovery occurred. No 24-hour success claim or notification delivery is implied.
+
+Next: review the existing local history after an observation window, assess availability and instruction-following separately, and inspect gaps/suspend periods. Confirm monitoring's own persistence at the next normal reboot. A desktop/menu launcher has been requested; its creation is not yet observed.
