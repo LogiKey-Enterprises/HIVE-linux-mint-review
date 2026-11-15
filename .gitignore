@@ -7,3 +7,8 @@ dist/
 build/
 .hive/
 .env
+
+# Local databases and backups
+hive.db
+hive.db-*
+backups/
