@@ -89,3 +89,52 @@ def test_ask_uses_configured_provider():
 
     assert result == "Connected"
     mocked.return_value.chat.assert_called_once()
+
+
+def test_provider_status_finds_configured_model():
+    response = {
+        "data": [
+            {
+                "id": "/models/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+                "aliases": [],
+            }
+        ]
+    }
+
+    with patch(
+        "hive.providers.llamacpp.urlopen",
+        return_value=FakeResponse(response),
+    ):
+        provider = LlamaCppProvider(
+            model="Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
+        )
+        result = provider.status()
+
+    assert result["available"] is True
+    assert result["model_loaded"] is True
+    assert result["configured_model"] == "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf"
+
+
+def test_provider_status_reports_missing_model():
+    response = {"data": [{"id": "another-model"}]}
+
+    with patch(
+        "hive.providers.llamacpp.urlopen",
+        return_value=FakeResponse(response),
+    ):
+        provider = LlamaCppProvider(model="missing-model")
+        result = provider.status()
+
+    assert result["available"] is True
+    assert result["model_loaded"] is False
+
+
+def test_provider_status_rejects_unexpected_response():
+    with patch(
+        "hive.providers.llamacpp.urlopen",
+        return_value=FakeResponse({"unexpected": True}),
+    ):
+        provider = LlamaCppProvider()
+
+        with pytest.raises(ProviderError):
+            provider.status()

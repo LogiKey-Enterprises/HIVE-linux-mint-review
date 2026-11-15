@@ -144,3 +144,51 @@ def test_graph_dependencies_handles_invalid_file(monkeypatch):
         cli.main(["graph", "dependencies", "1", "main.py"])
 
     assert exc.value.code == 2
+
+
+def test_ask_command(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "ask", lambda prompt: f"Answer: {prompt}")
+
+    cli.main(["ask", "Explain", "HIVE"])
+
+    assert "Answer: Explain HIVE" in capsys.readouterr().out
+
+
+def test_ai_status_command(monkeypatch, capsys):
+    monkeypatch.setattr(
+        cli,
+        "get_status",
+        lambda: {
+            "available": True,
+            "base_url": "http://127.0.0.1:8080/v1",
+            "configured_model": "test-model",
+            "model_loaded": True,
+            "available_models": ["test-model"],
+        },
+    )
+
+    cli.main(["ai", "status"])
+
+    output = capsys.readouterr().out
+    assert "AI provider: llama.cpp" in output
+    assert "Server: Available" in output
+    assert "Model loaded: Yes" in output
+
+
+def test_ai_status_fails_when_model_missing(monkeypatch):
+    monkeypatch.setattr(
+        cli,
+        "get_status",
+        lambda: {
+            "available": True,
+            "base_url": "http://127.0.0.1:8080/v1",
+            "configured_model": "missing-model",
+            "model_loaded": False,
+            "available_models": ["another-model"],
+        },
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["ai", "status"])
+
+    assert exc.value.code == 1

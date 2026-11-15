@@ -4,6 +4,7 @@ import argparse
 import logging
 
 from . import __version__
+from .ai import ask, get_status
 from .db import initialize, connect
 from .logging_setup import configure_logging
 from .repositories import add_repository, list_repositories
@@ -37,6 +38,16 @@ def build_parser():
 
     sub.add_parser("init", help="Initialize the local HIVE database")
     sub.add_parser("status", help="Show local HIVE database status")
+
+    ask_parser = sub.add_parser(
+        "ask",
+        help="Send a prompt to the configured AI model"
+    )
+    ask_parser.add_argument("prompt", nargs="+", help="Prompt text")
+
+    ai_parser = sub.add_parser("ai", help="Manage AI provider")
+    ai_sub = ai_parser.add_subparsers(dest="ai_command", required=True)
+    ai_sub.add_parser("status", help="Check AI server and model availability")
 
     inspect = sub.add_parser("inspect", help="Inspect a registered repository")
     inspect.add_argument("repository_id", type=int)
@@ -160,6 +171,32 @@ def main(argv=None):
             f"Repositories: {repos}\n"
             f"Capabilities: {caps}"
         )
+
+    elif args.command == "ask":
+        try:
+            print(ask(" ".join(args.prompt)))
+        except Exception as exc:
+            parser.exit(1, f"AI request failed: {exc}\\n")
+
+    elif args.command == "ai" and args.ai_command == "status":
+        try:
+            result = get_status()
+        except Exception as exc:
+            parser.exit(1, f"AI status check failed: {exc}\\n")
+
+        print("AI provider: llama.cpp")
+        print(f"Server: {'Available' if result['available'] else 'Unavailable'}")
+        print(f"Server URL: {result['base_url']}")
+        print(f"Configured model: {result['configured_model']}")
+        print(f"Model loaded: {'Yes' if result['model_loaded'] else 'No'}")
+
+        if result["available_models"]:
+            print("Models reported by server:")
+            for model in result["available_models"]:
+                print(f"  {model}")
+
+        if not result["model_loaded"]:
+            parser.exit(1, "Configured model was not found on the AI server.\\n")
 
     elif args.command == "inspect":
         initialize()

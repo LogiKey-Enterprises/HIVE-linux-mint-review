@@ -23,3 +23,9 @@ def ask(
         ],
         max_tokens=max_tokens,
     )
+
+
+
+def get_status() -> dict:
+    """Return the configured AI provider's live status."""
+    return get_provider().status()

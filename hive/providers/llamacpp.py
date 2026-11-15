@@ -88,3 +88,77 @@ class LlamaCppProvider:
             raise ProviderError("AI response content was not text.")
 
         return content
+
+
+    def status(self) -> dict:
+        """Check server availability and whether the configured model is loaded."""
+        request = Request(
+            f"{self.base_url}/models",
+            headers={"Accept": "application/json"},
+            method="GET",
+        )
+
+        try:
+            with urlopen(request, timeout=self.timeout) as response:
+                result = json.loads(response.read().decode("utf-8"))
+
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise ProviderError(
+                f"AI server returned HTTP {exc.code}: {detail}"
+            ) from exc
+
+        except (URLError, TimeoutError, OSError) as exc:
+            raise ProviderError(
+                f"Could not connect to local AI server: {exc}"
+            ) from exc
+
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            raise ProviderError(
+                "AI server returned invalid JSON."
+            ) from exc
+
+        if not isinstance(result, dict):
+            raise ProviderError("AI server returned an unexpected response.")
+
+        if "data" in result:
+            models = result["data"]
+        elif "models" in result:
+            models = result["models"]
+        else:
+            raise ProviderError(
+                "AI server response did not contain a model list."
+            )
+
+        if not isinstance(models, list):
+            raise ProviderError("AI server returned an unexpected model list.")
+
+        available_models = []
+        for item in models:
+            if isinstance(item, dict):
+                aliases = item.get("aliases", [])
+                if not isinstance(aliases, list):
+                    aliases = []
+
+                identifiers = [
+                    item.get("id"),
+                    item.get("name"),
+                    *aliases,
+                ]
+                available_models.extend(
+                    value for value in identifiers if isinstance(value, str)
+                )
+
+        configured_name = os.path.basename(self.model)
+        model_loaded = any(
+            model == self.model or os.path.basename(model) == configured_name
+            for model in available_models
+        )
+
+        return {
+            "available": True,
+            "base_url": self.base_url,
+            "configured_model": self.model,
+            "model_loaded": model_loaded,
+            "available_models": sorted(set(available_models)),
+        }
