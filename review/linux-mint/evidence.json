@@ -95,5 +95,19 @@
       "restart_for_instruction_failure": false
     },
     "actual_recovery_tested": "UNKNOWN"
+  },
+  "launcher": {
+    "name": "HIVE Mint",
+    "files_created": true,
+    "evidence": "Operator-pasted installer success output",
+    "locations": [
+      "~/.local/share/hive-launcher/terminal.rc",
+      "~/.local/share/applications/HIVE-Mint.desktop",
+      "configured Desktop directory/HIVE-Mint.desktop"
+    ],
+    "opens": "interactive terminal with existing HIVE environment",
+    "click_launch_verified": "UNKNOWN",
+    "after_reboot_launch_verified": "UNKNOWN",
+    "starts_additional_ai_server": false
   }
 }
