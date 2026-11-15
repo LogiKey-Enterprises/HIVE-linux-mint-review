@@ -100,4 +100,7 @@ Pause monitoring: systemctl --user disable --now hive-reliability.timer, then sy
 
 One reboot is verified; only ONE monitor sample is available in this conversation. Later scheduled firings, monitoring persistence across another reboot, sustained reliability and actual recovery after failure remain UNKNOWN. The first monitor run was explicitly triggered by its installer; an active timer does not prove later firings. No failure was induced and no recovery occurred. No 24-hour success claim or notification delivery is implied.
 
-Next: review the existing local history after an observation window, assess availability and instruction-following separately, and inspect gaps/suspend periods. Confirm monitoring's own persistence at the next normal reboot. A desktop/menu launcher has been requested; its creation is not yet observed.
+Next: review the existing local history after an observation window, assess availability and instruction-following separately, and inspect gaps/suspend periods. Confirm monitoring's own persistence at the next normal reboot. The HIVE Mint Desktop and applications-menu launcher files were created successfully, based on operator-pasted output: Created HIVE Mint in your applications menu and on your Desktop. Launcher activation and opening the icon after reboot remain UNKNOWN. The launcher opens an interactive terminal using the existing HIVE virtual environment and local-state database; it does not start another AI server.
+
+
+Launcher files on Mint: ~/.local/share/hive-launcher/terminal.rc, ~/.local/share/applications/HIVE-Mint.desktop and HIVE-Mint.desktop in the configured Desktop directory. If the desktop requires trust confirmation, allow launching; the actual GUI interaction is not yet evidenced.
