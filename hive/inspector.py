@@ -45,8 +45,8 @@ MAX_FILES = 5000
 MAX_TOTAL_BYTES = 25_000_000
 
 
-def initialize_inspector():
-    with connect() as conn:
+def initialize_inspector(path: Path | None = None):
+    with connect(path) as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS source_files (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -125,15 +125,19 @@ def python_symbols(source):
     return symbols
 
 
-def inspect_repository(repository_id, root):
+def inspect_repository(repository_id, root, database_path: Path | None = None):
     root = Path(root).expanduser().resolve()
 
     if not root.is_dir():
         raise ValueError(f"Repository path is not a directory: {root}")
 
-    initialize_inspector()
+    initialize_inspector(database_path)
 
-    with connect() as conn:
+    # Ensure graph storage exists for this database, including explicit paths.
+    from .graph import initialize_graph
+    initialize_graph(database_path)
+
+    with connect(database_path) as conn:
         repository = conn.execute(
             "SELECT id FROM repositories WHERE id = ?",
             (repository_id,),
@@ -229,7 +233,14 @@ def inspect_repository(repository_id, root):
 
     # Replace the repository snapshot atomically.
     # A failed database write rolls back and preserves the previous snapshot.
-    with connect() as conn:
+    with connect(database_path) as conn:
+        # Inspection changes invalidate the graph snapshot.
+        # Keep this deletion in the same transaction as snapshot replacement.
+        conn.execute(
+            "DELETE FROM source_relationships WHERE repository_id = ?",
+            (repository_id,),
+        )
+
         conn.execute(
             "DELETE FROM source_symbols WHERE repository_id = ?",
             (repository_id,),

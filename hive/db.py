@@ -40,6 +40,15 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
 
 def initialize(path: Path | None = None) -> Path:
     db_path = path or database_path()
+
     with connect(db_path) as conn:
         conn.executescript(SCHEMA)
+
+    # Import locally to avoid circular module imports.
+    from .inspector import initialize_inspector
+    from .graph import initialize_graph
+
+    initialize_inspector(db_path)
+    initialize_graph(db_path)
+
     return db_path
