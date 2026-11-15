@@ -6,6 +6,7 @@ from .logging_setup import configure_logging
 from .repositories import add_repository, list_repositories
 from .capabilities import add_capability, list_capabilities
 from .discovery import search_github
+from .inspector import inspect_repository
 
 def build_parser():
     parser=argparse.ArgumentParser(prog="hive",description="HIVE software capability registry")
@@ -13,6 +14,9 @@ def build_parser():
     sub=parser.add_subparsers(dest="command")
     sub.add_parser("init",help="Initialize the local HIVE database")
     sub.add_parser("status",help="Show local HIVE database status")
+    inspect = sub.add_parser("inspect",help="Inspect a registered repository")
+    inspect.add_argument("repository_id",type=int)
+    inspect.add_argument("path")
     repo=sub.add_parser("repo",help="Manage repositories")
     rs=repo.add_subparsers(dest="repo_command",required=True)
     add=rs.add_parser("add",help="Add a GitHub repository URL"); add.add_argument("url")
@@ -37,6 +41,16 @@ def main(argv=None):
             repos=c.execute("SELECT COUNT(*) FROM repositories").fetchone()[0]
             caps=c.execute("SELECT COUNT(*) FROM capabilities").fetchone()[0]
         print(f"HIVE {__version__}\nDatabase: {path}\nRepositories: {repos}\nCapabilities: {caps}")
+    elif args.command=="inspect":
+        initialize()
+        try:
+            result=inspect_repository(args.repository_id,args.path)
+            print(f"Inspection complete: {result['files_inspected']} files")
+            print(f"Skipped: {result['files_skipped']}")
+            print(f"Languages: {', '.join(result['languages']) or 'none'}")
+            print(f"Symbols found: {result['symbols_found']}")
+        except ValueError as exc:
+            parser.error(str(exc))
     elif args.command=="repo" and args.repo_command=="add":
         initialize(); print(f"Repository saved with ID {add_repository(args.url)}")
     elif args.command=="repo" and args.repo_command=="list":
