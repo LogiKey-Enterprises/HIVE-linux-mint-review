@@ -1,0 +1,36 @@
+SELECTED TECHNICAL OUTPUT — operator supplied, November 15, 2026
+This is an excerpted evidence receipt, not a complete transcript or CI artifact.
+
+HEAD is now at 4d00a48 Add local AI provider integration
+Successfully installed hive-engine-0.1.0
+No broken requirements found.
+41 passed in 7.44s
+
+Inspection complete: 20 files
+Skipped: 0
+Languages: Python
+Symbols found: 185
+Knowledge graph build complete.
+Repository ID: 1
+Files considered: 20
+Relationships found: 70
+Dependencies for hive/cli.py: import relationships returned
+Repositories: 1
+Capabilities: 0
+
+runtime.tar.gz: OK
+version: 0.9.0-dev (build 12110, commit cd959bae9)
+built with GNU 11.4.0 for Linux x86_64
+GGUF model header confirmed.
+Response: HIVE local AI connected
+Elapsed: 1.25 seconds
+PASS: HIVE received a live response from the local model.
+
+Live response: HIVE startup verified
+enabled
+active
+SUCCESS: Boot startup enabled; service is running and responding.
+A reboot test is still needed to verify startup after reboot.
+
+Interpretation: startup configuration and live service response demonstrated.
+Actual post-reboot operation and recurring reliability: UNKNOWN.

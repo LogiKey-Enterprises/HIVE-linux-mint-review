@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-15",
+  "machine": "broxson-mobile",
+  "os": {
+    "name": "Linux Mint",
+    "version": "22.3",
+    "desktop": "Xfce",
+    "basis": "existing machine continuity record; not freshly probed in session"
+  },
+  "provenance": "Operator-pasted terminal output, not direct laptop access or CI",
+  "hive": {
+    "tested_commit": "4d00a485120607f70b078301dfb8f008ad14ba53",
+    "version": "0.1.0",
+    "python": "3.12.3",
+    "pytest": {
+      "passed": 41,
+      "seconds": 7.44
+    },
+    "inspection": {
+      "files": 20,
+      "skipped": 0,
+      "symbols": 185
+    },
+    "graph": {
+      "files": 20,
+      "relationships": 70,
+      "dependency_query": "hive/cli.py succeeded"
+    },
+    "repositories": 1,
+    "capabilities": 0,
+    "pip_check": "no broken requirements"
+  },
+  "ai": {
+    "runtime": "llama.cpp b12110",
+    "runtime_commit": "cd959bae9",
+    "runtime_archive_sha256": "368227edcc229be5f9bed16a2223d79b5e41d0ac2e19bcf5825e82291c060e55",
+    "runtime_digest_match": true,
+    "model": "Qwen2.5-1.5B-Instruct Q4_K_M GGUF",
+    "model_publisher_digest_check": "UNKNOWN",
+    "backend": "CPU",
+    "endpoint": "http://127.0.0.1:8080/v1",
+    "first_response": "HIVE local AI connected",
+    "seconds": 1.25,
+    "after_service_response": "HIVE startup verified"
+  },
+  "startup": {
+    "service": "hive-local-ai.service",
+    "enabled": true,
+    "active": true,
+    "linger": "yes, asserted by successful script",
+    "reboot_verified": "UNKNOWN",
+    "crash_recovery_tested": "UNKNOWN"
+  },
+  "packaged_scripts": {
+    "status": "new reusable packaging of successful commands",
+    "validation": "shell and embedded Python syntax checked; exact packaged scripts not executed end-to-end on laptop"
+  },
+  "recurring_reliability": "UNKNOWN"
+}
