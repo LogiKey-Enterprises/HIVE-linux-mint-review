@@ -8,15 +8,7 @@ build/
 .hive/
 .env
 
-<<<<<<< HEAD
-# Local database backups
-backups/
-
-# Local working database
-hive.db
-=======
 # Local databases and backups
 hive.db
 hive.db-*
 backups/
->>>>>>> main
